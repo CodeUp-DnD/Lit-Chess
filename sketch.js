@@ -122,6 +122,11 @@ function loadAssets() {
 }
 
 function loadGLTF() {
+    const textureLoader = new THREE.TextureLoader();
+    let texture;
+ //   texture = textureLoader.load('./assets/textures/metal.png');
+    texture = textureLoader.load('./assets/textures/wood.png');
+
     const loader = new THREE.GLTFLoader();
     //   loader.load("./assets/bishop.glb", function (gltf) {
     //   loader.load("./assets/king.glb", function (gltf) {
@@ -137,6 +142,7 @@ function loadGLTF() {
         model.traverse(function (object) {
             if (object.isMesh) {
                 object.castShadow = true;
+                object.material.map = texture;
             }
         });
     });
