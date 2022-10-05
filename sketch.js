@@ -97,7 +97,7 @@ function loadAssets() {
   let cubeColor = new THREE.Color(Math.random()*255, Math.random()*255, Math.random()*255);
   // Texture cubes as background
  // loader.load('https://ipfs.io/ipfs/bafybeihsxmq6fqvjzew7sje5fg5ahtr3rytafzrrsdu3bkwuhbnsxvrcmm', function(object) {
-    loader.load('./assets/board.obj', function(object) {
+    loader.load('./assets/rook.obj', function(object) {
     object.name = "chessBoard";
     object.position = new THREE.Vector3();
     object.position.x = 0;
