@@ -18,6 +18,8 @@ let container,
     mesh,
     controls;
 let screenShotDone = false;
+let uniforms;
+let timeStart;
 
 function init() {
     scene = new THREE.Scene();
@@ -28,7 +30,7 @@ function init() {
     container = renderer.domElement;
     document.body.appendChild(container);
  // loadAssets();  //  to load a 3d model from ipfs link
-    loadGLTF();
+ //   loadGLTF();
     buildIt();
     addOrbitControls();
     window.addEventListener("resize", onWindowResize);
@@ -53,6 +55,9 @@ function updateScene() {
     }
     // put any scene updates here (rotation of objects for example, etc)
     controls.update();
+
+    uniforms['u_time'].value = (timeStart - new Date().getTime())/1000;
+
 }
 
 function setCamera() {
@@ -105,12 +110,19 @@ function loadAssets() {
         object.position.y = 0;
         object.position.z = 0;
         object.rotation.y = 0;
-        material = new THREE.MeshPhongMaterial({
-            side: THREE.DoubleSide,
-            color: cubeColor,
-            metalness: 0.8,
-            roughness: 0.2,
+        material = new THREE.ShaderMaterial({
+            uniforms: uniforms,
+            vertexShader: vertexShader(),//loadedVertexShader,
+            fragmentShader: fragmentShader(),//loadedFragmentShader,
+            // vertexShader: vertexShader(),
+            // fragmentShader: fragmentShader(),
         });
+        // material = new THREE.MeshPhongMaterial({
+        //     side: THREE.DoubleSide,
+        //     color: cubeColor,
+        //     metalness: 0.8,
+        //     roughness: 0.2,
+        // });
         object.material = material;
         scene.add(object);
 //    console.log("Spinner - ", object);
@@ -125,7 +137,7 @@ function loadGLTF() {
     const textureLoader = new THREE.TextureLoader();
     let texture;
  //   texture = textureLoader.load('./assets/textures/metal.png');
-    texture = textureLoader.load('./assets/textures/wood.png');
+    texture = textureLoader.load('./assets/textures/fire.png');
 
     const loader = new THREE.GLTFLoader();
     //   loader.load("./assets/bishop.glb", function (gltf) {
@@ -155,12 +167,28 @@ function buildIt() {
 
 
     geometry = new THREE.BoxGeometry(2, 2, 2);
-    material = new THREE.MeshPhongMaterial({
-        color: "purple",
-        side: THREE.DoubleSide,
+
+    timeStart = new Date().getTime();
+
+    uniforms = {
+        u_time: {value: 1.0},
+        u_resolution: {value: {x: 512, y: 512}},
+    };
+
+        material = new THREE.ShaderMaterial({
+        uniforms: uniforms,
+        vertexShader: vertexShader(),//loadedVertexShader,
+        fragmentShader: fragmentShader(),//loadedFragmentShader,
+        // vertexShader: vertexShader(),
+        // fragmentShader: fragmentShader(),
     });
+
+    // material = new THREE.MeshPhongMaterial({
+    //     color: "purple",
+    //     side: THREE.DoubleSide,
+    // });
     mesh = new THREE.Mesh(geometry, material);
-//  scene.add(mesh);
+  scene.add(mesh);
 //  console.log(scene);
 }
 
