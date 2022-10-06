@@ -1,9 +1,7 @@
 /*//////////////////////////////////////////////////////////
-"1ofX Simple ThreeJS template" 
+"Simple ThreeJS template"
 Original code by David Gail Smith, February 2022
-Twitter: @davidgailsmith
-http://baconbitscollective.org
-A simple JS starter template for THREE js projects on 1ofX
+A simple JS starter template for THREE js projects
 */ //////////////////////////////////////////////////////////
 
 let container,
@@ -17,9 +15,10 @@ let container,
     material,
     mesh,
     controls;
-let screenShotDone = false;
-let uniforms;
-let timeStart;
+
+// shader uniforms
+// let uniforms;
+// let timeStart;
 
 function init() {
     scene = new THREE.Scene();
@@ -29,34 +28,31 @@ function init() {
     buildRenderer();
     container = renderer.domElement;
     document.body.appendChild(container);
- // loadAssets();  //  to load a 3d model from ipfs link
- //   loadGLTF();
-    buildIt();
+ // loadAssets();  //  to load a 3d model obj from file or ipfs link
+  loadGLTF();  // load glb 3m model
+ //   buildIt();
     addOrbitControls();
     window.addEventListener("resize", onWindowResize);
 }
 
-function animate() {
+function animate() {  // animation loop
     requestAnimationFrame(animate);
     render();
 }
 
-function render() {
+function render() {  // update and render scene each frame
     updateScene();
     renderer.render(scene, camera);
 }
 
-function updateScene() {
-    if (screenShotDone == false) {
-        // waits for first frame to take screenshot and send features
-        //  add features on next line if desired
-        //  window.OneOfX.save({Hubs: 6, Stages: 3, Gears: 26, Rods: 29, Color_Schemes: 12, Palettes: 130});
-        screenShotDone = true;
-    }
+function updateScene() {  // scene updates per frame
     // put any scene updates here (rotation of objects for example, etc)
+
+    // update orbit controls (or other)
     controls.update();
 
-    uniforms['u_time'].value = (timeStart - new Date().getTime())/1000;
+    // update uniforms if using a shader
+    // uniforms['u_time'].value = (timeStart - new Date().getTime())/1000;
 
 }
 
@@ -91,25 +87,26 @@ function buildRenderer() {
     renderer.setPixelRatio(window.devicePixelRatio || 1);
 }
 
-function onWindowResize() {
+function onWindowResize() {  // be sure to resive others along with window
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-function loadAssets() {
+function loadAssets() {  // load textures / OBJ models
     const loader = new THREE.OBJLoader();
     let material;
     let cubeColor = new THREE.Color(Math.random() * 255, Math.random() * 255, Math.random() * 255);
-    // Texture cubes as background
     // loader.load('https://ipfs.io/ipfs/bafybeihsxmq6fqvjzew7sje5fg5ahtr3rytafzrrsdu3bkwuhbnsxvrcmm', function(object) {
-    loader.load('./assets/new_assets/glbs/rook.obj', function (object) {
+    loader.load('./assets/modelsOBJ/rook.obj', function (object) {
         object.name = "chessBoard";
         object.position = new THREE.Vector3();
         object.position.x = 0;
         object.position.y = 0;
         object.position.z = 0;
         object.rotation.y = 0;
+        
+        // shader material
         material = new THREE.ShaderMaterial({
             uniforms: uniforms,
             vertexShader: vertexShader(),//loadedVertexShader,
@@ -117,27 +114,48 @@ function loadAssets() {
             // vertexShader: vertexShader(),
             // fragmentShader: fragmentShader(),
         });
+        
+        // phong material
         // material = new THREE.MeshPhongMaterial({
         //     side: THREE.DoubleSide,
         //     color: cubeColor,
         //     metalness: 0.8,
         //     roughness: 0.2,
         // });
+        
         object.material = material;
         scene.add(object);
-//    console.log("Spinner - ", object);
+//    console.log(object);
     }, function (xhr) {
-//    console.log((xhr.loaded / xhr.total * 100) + '% of SPinner loaded');
+//    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
     }, function (error) {
-//    console.log('An error happened with Spinner:' + error);
+//    console.log('An error happened with loading:' + error);
     });
 }
 
-function loadGLTF() {
+function loadGLTF() {  // load GLB model(s)
     const textureLoader = new THREE.TextureLoader();
-    let texture;
- //   texture = textureLoader.load('./assets/textures/metal.png');
-    texture = textureLoader.load('./assets/textures/fire.png');
+
+    // let texture;
+    // texture = textureLoader.load('./assets/textures/fire.png');
+
+    // shader material
+    // material = new THREE.ShaderMaterial({
+    //     uniforms: uniforms,
+    //     vertexShader: vertexShader(),//loadedVertexShader,
+    //     fragmentShader: fragmentShader(),//loadedFragmentShader,
+    //     // vertexShader: vertexShader(),
+    //     // fragmentShader: fragmentShader(),
+    // });
+
+    // phong material
+    material = new THREE.MeshPhongMaterial({
+        side: THREE.DoubleSide,
+        color: new THREE.Color(1, 0, 0),
+        metalness: 0.8,
+        roughness: 0.2,
+    });
+
 
     const loader = new THREE.GLTFLoader();
     //   loader.load("./assets/bishop.glb", function (gltf) {
@@ -145,7 +163,7 @@ function loadGLTF() {
     //   loader.load("./assets/knight.glb", function (gltf) {
     //   loader.load("./assets/pawn.glb", function (gltf) {
     //   loader.load("./assets/queen.glb", function (gltf) {
-    loader.load("./assets/rook.glb", function (gltf) {
+    loader.load("./assets/modelsGLB/rook.glb", function (gltf) {
         let model = gltf.scene;
         console.log(model);
 //   gltf.scene.scale.set(0.1, 0.1, 0.1);
@@ -154,7 +172,10 @@ function loadGLTF() {
         model.traverse(function (object) {
             if (object.isMesh) {
                 object.castShadow = true;
-                object.material.map = texture;
+                // non texture
+                object.material = material;
+                // texture
+//                object.material.map = texture;
             }
         });
     });
@@ -163,32 +184,31 @@ function loadGLTF() {
 function buildIt() {
     //  put all of your geometry and materials in here
 
-  // draw the board
+    // draw the board
 
-
+    // build a cube;
     geometry = new THREE.BoxGeometry(2, 2, 2);
 
-    timeStart = new Date().getTime();
-
-    uniforms = {
-        u_time: {value: 1.0},
-        u_resolution: {value: {x: 512, y: 512}},
-    };
-
-        material = new THREE.ShaderMaterial({
-        uniforms: uniforms,
-        vertexShader: vertexShader(),//loadedVertexShader,
-        fragmentShader: fragmentShader(),//loadedFragmentShader,
-        // vertexShader: vertexShader(),
-        // fragmentShader: fragmentShader(),
-    });
-
-    // material = new THREE.MeshPhongMaterial({
-    //     color: "purple",
-    //     side: THREE.DoubleSide,
+    // shader stuff
+    // timeStart = new Date().getTime();
+    // uniforms = {
+    //     u_time: {value: 1.0},
+    //     u_resolution: {value: {x: 512, y: 512}},
+    // };
+    // material = new THREE.ShaderMaterial({
+    //     uniforms: uniforms,
+    //     vertexShader: vertexShader(),//loadedVertexShader,
+    //     fragmentShader: fragmentShader(),//loadedFragmentShader,
+    //     // vertexShader: vertexShader(),
+    //     // fragmentShader: fragmentShader(),
     // });
+
+    material = new THREE.MeshPhongMaterial({
+        color: "purple",
+        side: THREE.DoubleSide,
+    });
     mesh = new THREE.Mesh(geometry, material);
-  scene.add(mesh);
+    scene.add(mesh);
 //  console.log(scene);
 }
 
