@@ -34,6 +34,7 @@ async function init() {
  // loadAssets();  //  to load a 3d model obj from file or ipfs link
     let assetLoadResults = await loadGLTFAssets();  // load glb 3m model
     console.log(assetLoadResults)
+
  //   buildIt();
     buildBoard();
     buildPieces();
@@ -173,6 +174,7 @@ function loadGLTFAssets() {  // load GLB model(s)
         reject(err)
       }
     })
+
 }
 
 function buildBoard() {
