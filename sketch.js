@@ -16,6 +16,8 @@ let container,
     material,
     controls;
 
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
 // shader uniforms
 // let uniforms;
 // let timeStart;
@@ -38,6 +40,7 @@ async function init() {
     buildPieces();
     addOrbitControls();
     window.addEventListener("resize", onWindowResize);
+    window.addEventListener( 'pointermove', onPointerMove );
 }
 
 function animate() {  // animation loop
@@ -57,10 +60,20 @@ function updateScene() {  // scene updates per frame
 
     // update orbit controls (or other)
     if (controls) {
-        controls.update();
+          controls.update();
     }
     // update uniforms if using a shader
     // uniforms['u_time'].value = (timeStart - new Date().getTime())/1000;
+
+    // picker
+    // update the picking ray with the camera and pointer position
+    raycaster.setFromCamera( pointer, camera );
+    // calculate objects intersecting the picking ray
+    const intersects = raycaster.intersectObjects( scene.children );
+    for ( let i = 0; i < intersects.length; i ++ ) {
+        intersects[ i ].object.material.color.set( 0xff0000 );
+    }
+
 }
 
 function setCamera() {
@@ -86,6 +99,14 @@ function setLights() {
     spotLt.position.set(0, 4, 0);
     spotLt.decay = 2.0;
     scene.add(spotLt);
+}
+
+function onPointerMove( event ) {
+    // calculate pointer position in normalized device coordinates
+    // (-1 to +1) for both components
+    pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+ //   console.log(pointer);
 }
 
 function buildRenderer() {
@@ -224,7 +245,7 @@ function addOrbitControls() {
     controls = new OrbitControls(camera, container);
     controls.minDistance = 5;
     controls.maxDistance = 500;
-    controls.autoRotate = true;
+//    controls.autoRotate = true;
 }
 
 init();
@@ -256,4 +277,3 @@ const initiateChessEngineGame = () => {
         }
     }
 }
-
