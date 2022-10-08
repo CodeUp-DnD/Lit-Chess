@@ -140,3 +140,25 @@ function addOrbitControls() {
 
 init();
 animate();
+
+const initiateChessEngineGame = () => {
+  //Creating game using the js chess game engine
+  let game_engine = new jsChessEngine.Game()
+  game_engine.printToConsole()
+
+  //From examples folder
+  play()
+  function play () {
+      const status = game_engine.exportJson()
+      if (status.isFinished) {
+          console.log(`${status.turn} is in ${status.checkMate ? 'checkmate' : 'draw'}`)
+      } else {
+          console.time('Calculated in')
+          const move = game_engine.aiMove(status.turn === 'black' ? blackAiLevel : whiteAiLevel)
+          console.log(`${status.turn.toUpperCase()} move ${JSON.stringify(move)}`)
+          console.timeEnd('Calculated in')
+          game_engine.printToConsole()
+          play()
+      }
+  }
+}
