@@ -164,7 +164,7 @@ function loadAssets() {
 //                object.material.map = texture;
                     console.log("the model - " + model);
                     console.log("the object - " + object);
-                    models.push(object);
+                    models.push(model);
                 }
             });
         }).then(  () => {         console.log("models- " + models); buildPieces(); scene.add(models[0]);}
