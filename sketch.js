@@ -31,7 +31,7 @@ async function init() {
     buildRenderer();
     container = renderer.domElement;
     document.body.appendChild(container);
-    let assetLoadResults = await loadGLTFAssets();
+    await loadGLTFAssets();
     buildBoard();
     buildPieces();
     addOrbitControls();
@@ -51,14 +51,14 @@ function render() {  // update and render scene each frame
 function updateScene() {  // scene updates per frame
     // put any scene updates here (rotation of objects for example, etc)
 
+    // get or set game-state here
+
     // update orbit controls (or other)
     if (controls) {
         controls.update();
     }
-
     // update uniforms if using a shader
     // uniforms['u_time'].value = (timeStart - new Date().getTime())/1000;
-
 }
 
 function setCamera() {
@@ -68,9 +68,9 @@ function setCamera() {
         1,
         1000
     );
-    camera.position.x = 5;
-    camera.position.y = 3;
-    camera.position.z = 5;
+    camera.position.x = 17;
+    camera.position.y = 7;
+    camera.position.z = 17;
     scene.add(camera);
 }
 
@@ -100,8 +100,8 @@ function onWindowResize() {  // needed to resize others along with window
 
 const loadModel = async url => {
     const loader = new THREE.GLTFLoader();
-    let gltf = await loader.loadAsync(url)
-    return gltf
+    let gltf = await loader.loadAsync(url);
+    return gltf;
 }
 
 function loadGLTFAssets() {  // load GLB model(s)
@@ -128,9 +128,9 @@ function loadGLTFAssets() {  // load GLB model(s)
                 item.scene.traverse(function (object) {
                     if (object.isMesh) {
                         object.castShadow = true;
-                        // non texture
+                        // for non texture
                         object.material = material;
-                        // texture
+                        // for texture
                         // object.material.map = texture;
                         models.push(object);
                     }
@@ -149,6 +149,13 @@ function buildBoard() {
     let geom;
     let mat;
     let mesh;
+
+// util - show origin
+//     geom = new THREE.SphereGeometry(.5);
+//     mat = new THREE.MeshBasicMaterial({color:"red"});
+//     mesh = new THREE.Mesh(geom, mat);
+//     scene.add(mesh);
+
     for (let i = 0; i < 64; i++) {
         tempTilePositRef = {x: (i % 8), y: Math.floor(i / 8)};
         geom = new THREE.BoxGeometry(1.9, 1.9, 0.1);
@@ -159,7 +166,7 @@ function buildBoard() {
             side: THREE.DoubleSide,
         });
         mesh = new THREE.Mesh(geom, mat);
-        let posit = new THREE.Vector3(tempTilePositRef.x * 2 - 4, 0, tempTilePositRef.y * 2 - 4);
+        let posit = new THREE.Vector3(tempTilePositRef.x * 2 - 7, 0, tempTilePositRef.y * 2 - 7);
         mesh.position.set(posit.x, posit.y, posit.z);
         mesh.rotateX(Math.PI / 2);
         board.push({tempTilePositRef, mesh});
@@ -178,7 +185,7 @@ function buildPieces() {
             color: "grey",
             side: THREE.DoubleSide,
         });
-        temp1.position.set((i % 8) * 2 - 4, 0, Math.floor((i / 8)) * 2 - 4);
+        temp1.position.set((i % 8) * 2 - 7, 0, Math.floor((i / 8)) * 2 - 7);
         aTeam.push(temp1)
         scene.add(temp1);
 
@@ -188,7 +195,7 @@ function buildPieces() {
             color: "white",
             side: THREE.DoubleSide,
         });
-        temp2.position.set(((i + 16) % 8) * 2 - 4, 0, Math.floor((i + 16) / 8) * 2 + 4);
+        temp2.position.set(((i + 48) % 8) * 2 - 7, 0, Math.floor((i + 48) / 8) * 2 -7);
         temp2.rotateZ(Math.PI);
         bTeam.push(temp2);
         scene.add(temp2);
