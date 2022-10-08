@@ -23,7 +23,7 @@ let aTeam = [];
 let bTeam = [];
 let board = [];
 
-function init() {
+async function init() {
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
     setCamera();
@@ -32,13 +32,13 @@ function init() {
     container = renderer.domElement;
     document.body.appendChild(container);
  // loadAssets();  //  to load a 3d model obj from file or ipfs link
-  loadGLTFAssets();  // load glb 3m model
+    let assetLoadResults = await loadGLTFAssets();  // load glb 3m model
+    console.log(assetLoadResults)
  //   buildIt();
     buildBoard();
     buildPieces();
     addOrbitControls();
     window.addEventListener("resize", onWindowResize);
-    console.log(scene);
 }
 
 function animate() {  // animation loop
@@ -55,7 +55,9 @@ function updateScene() {  // scene updates per frame
     // put any scene updates here (rotation of objects for example, etc)
 
     // update orbit controls (or other)
-    controls.update();
+    if(controls){
+      controls.update();
+    }
 
     // update uniforms if using a shader
     // uniforms['u_time'].value = (timeStart - new Date().getTime())/1000;
@@ -139,49 +141,38 @@ function loadAssets() {  // load textures / OBJ models
     });
 }
 
+const loadModel = async url => {
+  const loader = new THREE.GLTFLoader();
+  let gltf = await loader.loadAsync(url)
+  return gltf
+}
+
 function loadGLTFAssets() {  // load GLB model(s)
-    const textureLoader = new THREE.TextureLoader();
-
-    // let texture;
-    // texture = textureLoader.load('./assets/textures/fire.png');
-
-    // shader material
-    // material = new THREE.ShaderMaterial({
-    //     uniforms: uniforms,
-    //     vertexShader: vertexShader(),//loadedVertexShader,
-    //     fragmentShader: fragmentShader(),//loadedFragmentShader,
-    //     // vertexShader: vertexShader(),
-    //     // fragmentShader: fragmentShader(),
-    // });
-
-    // phong material
-    material = new THREE.MeshPhongMaterial({
-        side: THREE.DoubleSide,
-        color: new THREE.Color(.7, .7, .7),
-        roughness: 0.2,
-    });
-
-    let order = ["pawn", "rook", "bishop", "knight", "queen", "king"];
-    const loader = new THREE.GLTFLoader();
-    for (let i = 0; i < order.length; i ++) {
-        let url = "./assets/modelsGLB/" + order[i] + ".glb";
-        loader.load(url, function (gltf) {
-            let model = gltf.scene;
-            model.position.set(0, 0, i*2);
-//   gltf.scene.scale.set(0.1, 0.1, 0.1);
-            scene.add(model);
-
-            model.traverse(function (object) {
-                if (object.isMesh) {
-                    object.castShadow = true;
-                    // non texture
-                    object.material = material;
-                    // texture
-//                object.material.map = texture;
-                }
-            });
+    return new Promise(async (resolve,reject)=>{
+      try{
+        const textureLoader = new THREE.TextureLoader();
+        material = new THREE.MeshPhongMaterial({
+            side: THREE.DoubleSide,
+            color: new THREE.Color(.7, .7, .7),
+            roughness: 0.2,
         });
-    }
+        
+        let order = ["pawn", "rook", "bishop", "knight", "queen", "king"];
+        let gltfs = []
+        for (let i = 0; i < order.length; i ++) {
+          let url = "./assets/modelsGLB/" + order[i] + ".glb";
+          gltfs.push(await loadModel(url))
+        }
+        gltfs.forEach(item=>{
+          models.push(item.scene)
+          console.log(item.scene)
+        })
+        await Promise.all(gltfs)
+        resolve(true)
+      }catch(err){
+        reject(err)
+      }
+    })
 }
 
 function buildBoard() {
@@ -208,18 +199,19 @@ function buildBoard() {
 }
 
 function buildPieces() {  // models array not poulating - fix glb asset loader
+    console.log(models)
     console.log("All - " + models);
     let order = [1, 2, 3, 4, 5, 3, 2, 1, 0, 0, 0, 0 ,0 ,0 ,0 ,0];
     for (let i = 0; i < order.length; i++) {
         let temp1 = models[order[i]];
         let temp2 = models[order[i]];
-        console.log(temp1, temp2);
+        // console.log(temp1, temp2);
 //        temp1.material.color = new THREE.Color("black");
-//        temp1.position.set(((i) % 8) * 2 - 4, 0, ((i) / 8) * 2 - 4);
+       temp1.position.set(((i) % 8) * 2 - 4, 0, ((i) / 8) * 2 - 4);
         aTeam.push(temp1)
         scene.add(temp1);
 //        temp2.material.color = new THREE.Color("white");
-//        temp2.position.set(((i) % 8) * 2 - 4, 0, ((i) / 8) * 2 + 3);
+       temp2.position.set(((i) % 8) * 2 - 4, 0, ((i) / 8) * 2 + 3);
         bTeam.push(temp2);
         scene.add(temp2);
     }
