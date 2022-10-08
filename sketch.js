@@ -1,6 +1,10 @@
-/*//////////////////////////////////////////////////////////
+/*//////////////////////////////////////////////////////////////
 Original code by David Gail Smith and Aldanis Vigo, October 2022
-*/ //////////////////////////////////////////////////////////
+*/ /////////////////////////////////////////////////////////////
+
+import * as THREE from "three";
+import { OrbitControls } from './node_modules/three/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from './node_modules/three/examples/jsm/loaders/GLTFLoader.js';
 
 let container,
     scene,
@@ -9,9 +13,7 @@ let container,
     ambLt,
     dirLt,
     spotLt,
-    geometry,
     material,
-    mesh,
     controls;
 
 // shader uniforms
@@ -99,7 +101,7 @@ function onWindowResize() {  // needed to resize others along with window
 }
 
 const loadModel = async url => {
-    const loader = new THREE.GLTFLoader();
+    const loader = new GLTFLoader();
     let gltf = await loader.loadAsync(url);
     return gltf;
 }
@@ -219,7 +221,7 @@ function buildPieces() {
 // }
 
 function addOrbitControls() {
-    controls = new THREE.OrbitControls(camera, container);
+    controls = new OrbitControls(camera, container);
     controls.minDistance = 5;
     controls.maxDistance = 500;
     controls.autoRotate = true;
@@ -254,3 +256,4 @@ const initiateChessEngineGame = () => {
         }
     }
 }
+
