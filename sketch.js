@@ -20,6 +20,7 @@ let container,
 // let uniforms;
 // let timeStart;
 
+let models = [];
 let aTeam = [];
 let bTeam = [];
 let board = [];
@@ -161,29 +162,34 @@ function loadGLTF() {  // load GLB model(s)
         roughness: 0.2,
     });
 
-
+    let order = ["pawn", "rook", "bishop", "knight", "queen", "king"];
     const loader = new THREE.GLTFLoader();
-    //   loader.load("./assets/bishop.glb", function (gltf) {
-    //   loader.load("./assets/king.glb", function (gltf) {
-    //   loader.load("./assets/knight.glb", function (gltf) {
-    //   loader.load("./assets/pawn.glb", function (gltf) {
-    //   loader.load("./assets/queen.glb", function (gltf) {
-    loader.load("./assets/modelsGLB/rook.glb", function (gltf) {
-        let model = gltf.scene;
-        console.log(model);
+    for (let i = 0; i < order.length; i ++) {
+        let url = "./assets/modelsGLB/" + order[i] + ".glb";
+        //   loader.load("./assets/bishop.glb", function (gltf) {
+        //   loader.load("./assets/king.glb", function (gltf) {
+        //   loader.load("./assets/knight.glb", function (gltf) {
+        //   loader.load("./assets/pawn.glb", function (gltf) {
+        //   loader.load("./assets/queen.glb", function (gltf) {
+        loader.load(url, function (gltf) {
+            let model = gltf.scene;
+            models.push(model);
+            model.position.set(0, 0, i*2);
+            console.log(model);
 //   gltf.scene.scale.set(0.1, 0.1, 0.1);
-        scene.add(model);
+            scene.add(model);
 
-        model.traverse(function (object) {
-            if (object.isMesh) {
-                object.castShadow = true;
-                // non texture
-                object.material = material;
-                // texture
+            model.traverse(function (object) {
+                if (object.isMesh) {
+                    object.castShadow = true;
+                    // non texture
+                    object.material = material;
+                    // texture
 //                object.material.map = texture;
-            }
+                }
+            });
         });
-    });
+    }
 }
 
 function buildBoard() {
@@ -196,18 +202,17 @@ function buildBoard() {
         geom = new THREE.BoxGeometry(1.9,1.9,0.1);
         mat = new THREE.MeshPhongMaterial({
             color: "purple",
+            transparent: true,
+            opacity: 0.5,
             side: THREE.DoubleSide,
         });
         mesh = new THREE.Mesh(geom, mat);
         let posit = new THREE.Vector3(tempTilePositRef.x * 2 - 4, 0, tempTilePositRef.y *2 - 4);
         mesh.position.set(posit.x, posit.y, posit.z);
         mesh.rotateX(Math.PI/2);
-        //mesh.rotateY(Math.PI/4);
         board.push({tempTilePositRef, mesh});
-
         scene.add(mesh);
     }
-
 }
 
 function buildPieces() {
