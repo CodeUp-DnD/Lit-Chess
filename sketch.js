@@ -32,7 +32,8 @@ function init() {
     container = renderer.domElement;
     document.body.appendChild(container);
  // loadAssets();  //  to load a 3d model obj from file or ipfs link
-  loadGLTFAssets();  // load glb 3m model
+  loadAssets();
+      // load glb 3m model
  //   buildIt();
     buildBoard();
     buildPieces();
@@ -139,8 +140,41 @@ function loadAssets() {  // load textures / OBJ models
     });
 }
 
-function loadGLTFAssets() {  // load GLB model(s)
-    const textureLoader = new THREE.TextureLoader();
+function loadAssets() {
+    material = new THREE.MeshPhongMaterial({
+        side: THREE.DoubleSide,
+        color: new THREE.Color(.7, .7, .7),
+        roughness: 0.2,
+    });
+    let order = ["pawn", "rook", "bishop", "knight", "queen", "king"];
+    for (let i = 0; i < order.length; i ++) {
+        let model;
+        let url = "./assets/modelsGLB/" + order[i] + ".glb";
+        loadSingleGLTFAsset(url).then (gltf => {
+            model = gltf.scene;
+            model.position.set(0, 0, i*2);
+//   gltf.scene.scale.set(0.1, 0.1, 0.1);
+  //          scene.add(model);
+            model.traverse(function (object) {
+                if (object.isMesh) {
+                    object.castShadow = true;
+                    // non texture
+                    object.material = material;
+                    // texture
+//                object.material.map = texture;
+                    console.log("the model - " + model);
+                    console.log("the object - " + object);
+                    models.push(object);
+                }
+            });
+        }).then(  () => {         console.log("models- " + models); buildPieces(); scene.add(models[0]);}
+    );
+    }
+
+}
+
+function loadSingleGLTFAsset(url) {  // load GLB model(s)
+   // textureLoader = new THREE.TextureLoader();
 
     // let texture;
     // texture = textureLoader.load('./assets/textures/fire.png');
@@ -155,33 +189,16 @@ function loadGLTFAssets() {  // load GLB model(s)
     // });
 
     // phong material
-    material = new THREE.MeshPhongMaterial({
-        side: THREE.DoubleSide,
-        color: new THREE.Color(.7, .7, .7),
-        roughness: 0.2,
+//    material = new THREE.MeshPhongMaterial({
+//        side: THREE.DoubleSide,
+ //       color: new THREE.Color(.7, .7, .7),
+//        roughness: 0.2,
+//    });
+
+//    let order = ["pawn", "rook", "bishop", "knight", "queen", "king"];
+    return new Promise(resolve => {
+        new THREE.GLTFLoader().load(url, resolve);
     });
-
-    let order = ["pawn", "rook", "bishop", "knight", "queen", "king"];
-    const loader = new THREE.GLTFLoader();
-    for (let i = 0; i < order.length; i ++) {
-        let url = "./assets/modelsGLB/" + order[i] + ".glb";
-        loader.load(url, function (gltf) {
-            let model = gltf.scene;
-            model.position.set(0, 0, i*2);
-//   gltf.scene.scale.set(0.1, 0.1, 0.1);
-            scene.add(model);
-
-            model.traverse(function (object) {
-                if (object.isMesh) {
-                    object.castShadow = true;
-                    // non texture
-                    object.material = material;
-                    // texture
-//                object.material.map = texture;
-                }
-            });
-        });
-    }
 }
 
 function buildBoard() {
