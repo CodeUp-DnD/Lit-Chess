@@ -6,13 +6,43 @@
 
 </head>
 <body id="ourWindow">
-<script src="./libJS/three.js"></script>
-<script src="./libJS/OrbitControls.js"></script>
-<script src="./libJS/OBJLoader.js"></script>
-<script src="./libJS/GLTFLoader.js"></script>
-<script src="./shaders.js"></script>
-<script src="./sketch.js"></script>
-<canvas id="glscreen" class="pane"></canvas>
-
+  <!--calls for your script and any libraries used below-->
+  <script src="./libJS/three.js"></script>
+  <script src="./libJS/OrbitControls.js"></script>
+  <script src="./libJS/OBJLoader.js"></script>
+  <script src="./libJS/GLTFLoader.js"></script>
+  <script src="./shaders.js"></script>
+  <script src="./node_modules/js-chess-engine/dist/js-chess-engine.js" defer></script>
+  <script src="./sketch.js" defer></script>
+ <canvas id="glscreen"></canvas>  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+    div {
+      resize: both;
+      overflow: auto;
+    }
+    canvas {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    #webgl {
+       width: 100%;
+       height: 100%;
+       display: block;
+    }
+    .pane {
+      width: auto;
+      min-width:1.2em;
+      float: left;
+      height: 100%;
+      border: 1px solid black;
+    }
+  </style>
 </body>
 </html>
