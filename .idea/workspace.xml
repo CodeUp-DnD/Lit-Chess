@@ -1,26 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="07deb0a7-ec56-4744-8ae2-9692e1b704bd" name="Changes" comment="">
+    <list default="true" id="591d5ad3-8648-4785-88f3-991bc17ad0c3" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/bishop.glb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/bishop.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/bishop.obj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/king.glb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/king.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/king.obj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/knight.glb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/knight.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/knight.obj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/pawn.glb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/pawn.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/pawn.obj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/queen.glb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/queen.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/queen.obj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/rook.glb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/rook.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/rook.obj" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/sketch.js" beforeDir="false" afterPath="$PROJECT_DIR$/sketch.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -31,73 +13,37 @@
   <component name="ComposerSettings">
     <execution />
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="JavaScript File" />
-      </list>
-    </option>
-  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectId" id="2FhHkNPDAwpZBmnIKaQ608MR7zL" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectId" id="2FlRkXCUOuSMkvCxuwaDi4jcjUp" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/dgsmith7/IdeaProjects/lit-chess&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "nodejs_package_manager_path": "npm"
   }
-}</component>
-  <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/assets/textures" />
-    </key>
-  </component>
-  <component name="RunManager">
-    <configuration default="true" type="JetRunConfigurationType">
-      <module name="lit-chess" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
-      <module name="lit-chess" />
-      <option name="filePath" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-  </component>
+}]]></component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="07deb0a7-ec56-4744-8ae2-9692e1b704bd" name="Changes" comment="" />
-      <created>1664937539446</created>
+      <changelist id="591d5ad3-8648-4785-88f3-991bc17ad0c3" name="Changes" comment="" />
+      <created>1665064830289</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1664937539446</updated>
-      <workItem from="1664937540810" duration="3295000" />
-      <workItem from="1664941887347" duration="19000" />
-      <workItem from="1665022266235" duration="34000" />
-      <workItem from="1665022306481" duration="531000" />
-      <workItem from="1665026397113" duration="143000" />
-      <workItem from="1665026563741" duration="3195000" />
-      <workItem from="1665030044810" duration="14000" />
-      <workItem from="1665030162657" duration="14000" />
-      <workItem from="1665030337243" duration="1065000" />
-      <workItem from="1665063078338" duration="1036000" />
-      <workItem from="1665064127362" duration="487000" />
+      <updated>1665064830289</updated>
+      <workItem from="1665064831981" duration="411000" />
+      <workItem from="1665066398577" duration="1499000" />
+      <workItem from="1665150405019" duration="18000" />
+      <workItem from="1665203096141" duration="1456000" />
     </task>
     <servers />
   </component>

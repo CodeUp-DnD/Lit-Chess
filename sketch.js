@@ -20,6 +20,10 @@ let container,
 // let uniforms;
 // let timeStart;
 
+let aTeam = [];
+let bTeam = [];
+let board = [];
+
 function init() {
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
@@ -31,8 +35,10 @@ function init() {
  // loadAssets();  //  to load a 3d model obj from file or ipfs link
   loadGLTF();  // load glb 3m model
  //   buildIt();
+    buildBoard();
     addOrbitControls();
     window.addEventListener("resize", onWindowResize);
+    console.log(scene);
 }
 
 function animate() {  // animation loop
@@ -151,8 +157,7 @@ function loadGLTF() {  // load GLB model(s)
     // phong material
     material = new THREE.MeshPhongMaterial({
         side: THREE.DoubleSide,
-        color: new THREE.Color(1, 0, 0),
-        metalness: 0.8,
+        color: new THREE.Color(.7, .7, .7),
         roughness: 0.2,
     });
 
@@ -179,6 +184,34 @@ function loadGLTF() {  // load GLB model(s)
             }
         });
     });
+}
+
+function buildBoard() {
+    let tempTilePositRef = {};
+    let geom;
+    let mat;
+    let mesh;
+    for (let i = 0; i < 64; i++) {
+        tempTilePositRef = {x: ((i) % 8), y: Math.floor((i) / 8)};
+        geom = new THREE.BoxGeometry(1.9,1.9,0.1);
+        mat = new THREE.MeshPhongMaterial({
+            color: "purple",
+            side: THREE.DoubleSide,
+        });
+        mesh = new THREE.Mesh(geom, mat);
+        let posit = new THREE.Vector3(tempTilePositRef.x * 2 - 4, 0, tempTilePositRef.y *2 - 4);
+        mesh.position.set(posit.x, posit.y, posit.z);
+        mesh.rotateX(Math.PI/2);
+        //mesh.rotateY(Math.PI/4);
+        board.push({tempTilePositRef, mesh});
+
+        scene.add(mesh);
+    }
+
+}
+
+function buildPieces() {
+
 }
 
 function buildIt() {
