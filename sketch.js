@@ -1,7 +1,5 @@
 /*//////////////////////////////////////////////////////////
-"Simple ThreeJS template"
-Original code by David Gail Smith, February 2022
-A simple JS starter template for THREE js projects
+Original code by David Gail Smith and Aldanis Vigo, October 2022
 */ //////////////////////////////////////////////////////////
 
 let container,
@@ -167,11 +165,6 @@ function loadGLTFAssets() {  // load GLB model(s)
     const loader = new THREE.GLTFLoader();
     for (let i = 0; i < order.length; i ++) {
         let url = "./assets/modelsGLB/" + order[i] + ".glb";
-        //   loader.load("./assets/bishop.glb", function (gltf) {
-        //   loader.load("./assets/king.glb", function (gltf) {
-        //   loader.load("./assets/knight.glb", function (gltf) {
-        //   loader.load("./assets/pawn.glb", function (gltf) {
-        //   loader.load("./assets/queen.glb", function (gltf) {
         loader.load(url, function (gltf) {
             let model = gltf.scene;
             model.position.set(0, 0, i*2);
@@ -185,7 +178,6 @@ function loadGLTFAssets() {  // load GLB model(s)
                     object.material = material;
                     // texture
 //                object.material.map = texture;
-
                 }
             });
         });
@@ -215,7 +207,7 @@ function buildBoard() {
     }
 }
 
-function buildPieces() {
+function buildPieces() {  // models array not poulating - fix glb asset loader
     console.log("All - " + models);
     let order = [1, 2, 3, 4, 5, 3, 2, 1, 0, 0, 0, 0 ,0 ,0 ,0 ,0];
     for (let i = 0; i < order.length; i++) {
