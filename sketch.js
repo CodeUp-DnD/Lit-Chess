@@ -34,9 +34,10 @@ function init() {
     container = renderer.domElement;
     document.body.appendChild(container);
  // loadAssets();  //  to load a 3d model obj from file or ipfs link
-  loadGLTF();  // load glb 3m model
+  loadGLTFAssets();  // load glb 3m model
  //   buildIt();
     buildBoard();
+    buildPieces();
     addOrbitControls();
     window.addEventListener("resize", onWindowResize);
     console.log(scene);
@@ -140,7 +141,7 @@ function loadAssets() {  // load textures / OBJ models
     });
 }
 
-function loadGLTF() {  // load GLB model(s)
+function loadGLTFAssets() {  // load GLB model(s)
     const textureLoader = new THREE.TextureLoader();
 
     // let texture;
@@ -173,9 +174,7 @@ function loadGLTF() {  // load GLB model(s)
         //   loader.load("./assets/queen.glb", function (gltf) {
         loader.load(url, function (gltf) {
             let model = gltf.scene;
-            models.push(model);
             model.position.set(0, 0, i*2);
-            console.log(model);
 //   gltf.scene.scale.set(0.1, 0.1, 0.1);
             scene.add(model);
 
@@ -186,6 +185,7 @@ function loadGLTF() {  // load GLB model(s)
                     object.material = material;
                     // texture
 //                object.material.map = texture;
+
                 }
             });
         });
@@ -216,7 +216,21 @@ function buildBoard() {
 }
 
 function buildPieces() {
-
+    console.log("All - " + models);
+    let order = [1, 2, 3, 4, 5, 3, 2, 1, 0, 0, 0, 0 ,0 ,0 ,0 ,0];
+    for (let i = 0; i < order.length; i++) {
+        let temp1 = models[order[i]];
+        let temp2 = models[order[i]];
+        console.log(temp1, temp2);
+//        temp1.material.color = new THREE.Color("black");
+//        temp1.position.set(((i) % 8) * 2 - 4, 0, ((i) / 8) * 2 - 4);
+        aTeam.push(temp1)
+        scene.add(temp1);
+//        temp2.material.color = new THREE.Color("white");
+//        temp2.position.set(((i) % 8) * 2 - 4, 0, ((i) / 8) * 2 + 3);
+        bTeam.push(temp2);
+        scene.add(temp2);
+    }
 }
 
 function buildIt() {
