@@ -81,7 +81,7 @@ function setLights() {
     dirLt.position.set(0, 15, 0);
     scene.add(dirLt);
     spotLt = new THREE.SpotLight(0xffffff, 0.5);
-    spotLt.position.set(5, 1, 2);
+    spotLt.position.set(0, 4, 0);
     spotLt.decay = 2.0;
     scene.add(spotLt);
 }
@@ -108,13 +108,12 @@ function loadGLTFAssets() {  // load GLB model(s)
     return new Promise(async (resolve, reject) => {
         try {
             // if using texture, load here
-            //  const textureLoader = new THREE.TextureLoader();
+            // const textureLoader = new THREE.TextureLoader();
             // let texture = textureLoader.load('texturefile.png');
             // initial material for pieces colored red
             material = new THREE.MeshPhongMaterial({
                 side: THREE.DoubleSide,
                 color: "red",
-                roughness: 0.2,
             });
             // load each 3d model into a model array for later use in building teams
             let order = ["pawn", "rook", "bishop", "knight", "queen", "king"];
@@ -149,13 +148,6 @@ function buildBoard() {
     let geom;
     let mat;
     let mesh;
-
-// util - show origin
-//     geom = new THREE.SphereGeometry(.5);
-//     mat = new THREE.MeshBasicMaterial({color:"red"});
-//     mesh = new THREE.Mesh(geom, mat);
-//     scene.add(mesh);
-
     for (let i = 0; i < 64; i++) {
         tempTilePositRef = {x: (i % 8), y: Math.floor(i / 8)};
         geom = new THREE.BoxGeometry(1.9, 1.9, 0.1);
@@ -202,6 +194,13 @@ function buildPieces() {
     }
 }
 
+// function utilShowOrigin() {
+//     let geom = new THREE.SphereGeometry(.5);
+//     let mat = new THREE.MeshBasicMaterial({color:"red"});
+//     let mesh = new THREE.Mesh(geom, mat);
+//     scene.add(mesh);
+// }
+
 // function initShaderMat() {
     // shader stuff
     // timeStart = new Date().getTime();
@@ -230,13 +229,17 @@ init();
 animate();
 
 const initiateChessEngineGame = () => {
+
+    ///   DGS - maybe this part goes in init function
     //Creating game using the js chess game engine
     let game_engine = new jsChessEngine.Game()
     game_engine.printToConsole()
 
+    ///   DGS - maybe this part also goes in init function
     //From examples folder
     play()
 
+    ///   DGS - then since animate/update/render are the game loop then somehow pass state in the update function?
     function play() {
         const status = game_engine.exportJson()
         if (status.isFinished) {
