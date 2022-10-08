@@ -31,11 +31,7 @@ async function init() {
     buildRenderer();
     container = renderer.domElement;
     document.body.appendChild(container);
- // loadAssets();  //  to load a 3d model obj from file or ipfs link
-    let assetLoadResults = await loadGLTFAssets();  // load glb 3m model
-    console.log(assetLoadResults)
-
- //   buildIt();
+    let assetLoadResults = await loadGLTFAssets();
     buildBoard();
     buildPieces();
     addOrbitControls();
@@ -56,8 +52,8 @@ function updateScene() {  // scene updates per frame
     // put any scene updates here (rotation of objects for example, etc)
 
     // update orbit controls (or other)
-    if(controls){
-      controls.update();
+    if (controls) {
+        controls.update();
     }
 
     // update uniforms if using a shader
@@ -96,85 +92,56 @@ function buildRenderer() {
     renderer.setPixelRatio(window.devicePixelRatio || 1);
 }
 
-function onWindowResize() {  // be sure to resive others along with window
+function onWindowResize() {  // needed to resize others along with window
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-function loadAssets() {  // load textures / OBJ models
-    const loader = new THREE.OBJLoader();
-    let material;
-    let cubeColor = new THREE.Color(Math.random() * 255, Math.random() * 255, Math.random() * 255);
-    // loader.load('https://ipfs.io/ipfs/bafybeihsxmq6fqvjzew7sje5fg5ahtr3rytafzrrsdu3bkwuhbnsxvrcmm', function(object) {
-    loader.load('./assets/modelsOBJ/rook.obj', function (object) {
-        object.name = "chessBoard";
-        object.position = new THREE.Vector3();
-        object.position.x = 0;
-        object.position.y = 0;
-        object.position.z = 0;
-        object.rotation.y = 0;
-        
-        // shader material
-        material = new THREE.ShaderMaterial({
-            uniforms: uniforms,
-            vertexShader: vertexShader(),//loadedVertexShader,
-            fragmentShader: fragmentShader(),//loadedFragmentShader,
-            // vertexShader: vertexShader(),
-            // fragmentShader: fragmentShader(),
-        });
-        
-        // phong material
-        // material = new THREE.MeshPhongMaterial({
-        //     side: THREE.DoubleSide,
-        //     color: cubeColor,
-        //     metalness: 0.8,
-        //     roughness: 0.2,
-        // });
-        
-        object.material = material;
-        scene.add(object);
-//    console.log(object);
-    }, function (xhr) {
-//    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-    }, function (error) {
-//    console.log('An error happened with loading:' + error);
-    });
-}
-
 const loadModel = async url => {
-  const loader = new THREE.GLTFLoader();
-  let gltf = await loader.loadAsync(url)
-  return gltf
+    const loader = new THREE.GLTFLoader();
+    let gltf = await loader.loadAsync(url)
+    return gltf
 }
 
 function loadGLTFAssets() {  // load GLB model(s)
-    return new Promise(async (resolve,reject)=>{
-      try{
-        const textureLoader = new THREE.TextureLoader();
-        material = new THREE.MeshPhongMaterial({
-            side: THREE.DoubleSide,
-            color: new THREE.Color(.7, .7, .7),
-            roughness: 0.2,
-        });
-        
-        let order = ["pawn", "rook", "bishop", "knight", "queen", "king"];
-        let gltfs = []
-        for (let i = 0; i < order.length; i ++) {
-          let url = "./assets/modelsGLB/" + order[i] + ".glb";
-          gltfs.push(await loadModel(url))
+    return new Promise(async (resolve, reject) => {
+        try {
+            // if using texture, load here
+            //  const textureLoader = new THREE.TextureLoader();
+            // let texture = textureLoader.load('texturefile.png');
+            // initial material for pieces colored red
+            material = new THREE.MeshPhongMaterial({
+                side: THREE.DoubleSide,
+                color: "red",
+                roughness: 0.2,
+            });
+            // load each 3d model into a model array for later use in building teams
+            let order = ["pawn", "rook", "bishop", "knight", "queen", "king"];
+            let gltfs = [];
+            for (let i = 0; i < order.length; i++) {
+                let url = "./assets/modelsGLB/" + order[i] + ".glb";
+                gltfs.push(await loadModel(url))
+            }
+            // get the meshes out of the scene in glb file and assign materials and push to array
+            gltfs.forEach(item => {
+                item.scene.traverse(function (object) {
+                    if (object.isMesh) {
+                        object.castShadow = true;
+                        // non texture
+                        object.material = material;
+                        // texture
+                        // object.material.map = texture;
+                        models.push(object);
+                    }
+                });
+            })
+            await Promise.all(gltfs)
+            resolve(true)
+        } catch (err) {
+            reject(err)
         }
-        gltfs.forEach(item=>{
-          models.push(item.scene)
-          console.log(item.scene)
-        })
-        await Promise.all(gltfs)
-        resolve(true)
-      }catch(err){
-        reject(err)
-      }
     })
-
 }
 
 function buildBoard() {
@@ -183,8 +150,8 @@ function buildBoard() {
     let mat;
     let mesh;
     for (let i = 0; i < 64; i++) {
-        tempTilePositRef = {x: ((i) % 8), y: Math.floor((i) / 8)};
-        geom = new THREE.BoxGeometry(1.9,1.9,0.1);
+        tempTilePositRef = {x: (i % 8), y: Math.floor(i / 8)};
+        geom = new THREE.BoxGeometry(1.9, 1.9, 0.1);
         mat = new THREE.MeshPhongMaterial({
             color: "purple",
             transparent: true,
@@ -192,41 +159,43 @@ function buildBoard() {
             side: THREE.DoubleSide,
         });
         mesh = new THREE.Mesh(geom, mat);
-        let posit = new THREE.Vector3(tempTilePositRef.x * 2 - 4, 0, tempTilePositRef.y *2 - 4);
+        let posit = new THREE.Vector3(tempTilePositRef.x * 2 - 4, 0, tempTilePositRef.y * 2 - 4);
         mesh.position.set(posit.x, posit.y, posit.z);
-        mesh.rotateX(Math.PI/2);
+        mesh.rotateX(Math.PI / 2);
         board.push({tempTilePositRef, mesh});
         scene.add(mesh);
     }
 }
 
-function buildPieces() {  // models array not poulating - fix glb asset loader
-    console.log(models)
-    console.log("All - " + models);
-    let order = [1, 2, 3, 4, 5, 3, 2, 1, 0, 0, 0, 0 ,0 ,0 ,0 ,0];
+function buildPieces() {
+    // build two full sets of pieces, each set a different color
+    let order = [1, 2, 3, 4, 5, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0]; // rook, knight, bishop, etc. (models array indices)
     for (let i = 0; i < order.length; i++) {
-        let temp1 = models[order[i]];
-        let temp2 = models[order[i]];
-        // console.log(temp1, temp2);
-//        temp1.material.color = new THREE.Color("black");
-       temp1.position.set(((i) % 8) * 2 - 4, 0, ((i) / 8) * 2 - 4);
+        // team 1
+        let temp1 = models[order[i]].clone();
+        // this is phong, but could use shader material here if we get fancy (and below for tm 2
+        temp1.material = new THREE.MeshPhongMaterial({
+            color: "grey",
+            side: THREE.DoubleSide,
+        });
+        temp1.position.set((i % 8) * 2 - 4, 0, Math.floor((i / 8)) * 2 - 4);
         aTeam.push(temp1)
         scene.add(temp1);
-//        temp2.material.color = new THREE.Color("white");
-       temp2.position.set(((i) % 8) * 2 - 4, 0, ((i) / 8) * 2 + 3);
+
+        // team 2
+        let temp2 = models[order[i]].clone();
+        temp2.material = new THREE.MeshPhongMaterial({
+            color: "white",
+            side: THREE.DoubleSide,
+        });
+        temp2.position.set(((i + 16) % 8) * 2 - 4, 0, Math.floor((i + 16) / 8) * 2 + 4);
+        temp2.rotateZ(Math.PI);
         bTeam.push(temp2);
         scene.add(temp2);
     }
 }
 
-function buildIt() {
-    //  put all of your geometry and materials in here
-
-    // draw the board
-
-    // build a cube;
-    geometry = new THREE.BoxGeometry(2, 2, 2);
-
+// function initShaderMat() {
     // shader stuff
     // timeStart = new Date().getTime();
     // uniforms = {
@@ -240,44 +209,38 @@ function buildIt() {
     //     // vertexShader: vertexShader(),
     //     // fragmentShader: fragmentShader(),
     // });
-
-    material = new THREE.MeshPhongMaterial({
-        color: "purple",
-        side: THREE.DoubleSide,
-    });
-    mesh = new THREE.Mesh(geometry, material);
-    scene.add(mesh);
-//  console.log(scene);
-}
+    // return material;
+// }
 
 function addOrbitControls() {
     controls = new THREE.OrbitControls(camera, container);
     controls.minDistance = 5;
     controls.maxDistance = 500;
-//  controls.autoRotate = true;
+    controls.autoRotate = true;
 }
 
 init();
 animate();
 
 const initiateChessEngineGame = () => {
-  //Creating game using the js chess game engine
-  let game_engine = new jsChessEngine.Game()
-  game_engine.printToConsole()
+    //Creating game using the js chess game engine
+    let game_engine = new jsChessEngine.Game()
+    game_engine.printToConsole()
 
-  //From examples folder
-  play()
-  function play () {
-      const status = game_engine.exportJson()
-      if (status.isFinished) {
-          console.log(`${status.turn} is in ${status.checkMate ? 'checkmate' : 'draw'}`)
-      } else {
-          console.time('Calculated in')
-          const move = game_engine.aiMove(status.turn === 'black' ? blackAiLevel : whiteAiLevel)
-          console.log(`${status.turn.toUpperCase()} move ${JSON.stringify(move)}`)
-          console.timeEnd('Calculated in')
-          game_engine.printToConsole()
-          play()
-      }
-  }
+    //From examples folder
+    play()
+
+    function play() {
+        const status = game_engine.exportJson()
+        if (status.isFinished) {
+            console.log(`${status.turn} is in ${status.checkMate ? 'checkmate' : 'draw'}`)
+        } else {
+            console.time('Calculated in')
+            const move = game_engine.aiMove(status.turn === 'black' ? blackAiLevel : whiteAiLevel)
+            console.log(`${status.turn.toUpperCase()} move ${JSON.stringify(move)}`)
+            console.timeEnd('Calculated in')
+            game_engine.printToConsole()
+            play()
+        }
+    }
 }
