@@ -2,7 +2,7 @@
 Original code by David Gail Smith and Aldanis Vigo, October 2022
 */ /////////////////////////////////////////////////////////////
 
-import * as THREE from "three";
+import * as THREE from "./node_modules/three/src/Three.js";
 import {OrbitControls} from './node_modules/three/examples/jsm/controls/OrbitControls.js';
 import {GLTFLoader} from './node_modules/three/examples/jsm/loaders/GLTFLoader.js';
 
