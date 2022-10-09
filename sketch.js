@@ -3,8 +3,8 @@ Original code by David Gail Smith and Aldanis Vigo, October 2022
 */ /////////////////////////////////////////////////////////////
 
 import * as THREE from "three";
-import { OrbitControls } from './node_modules/three/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from './node_modules/three/examples/jsm/loaders/GLTFLoader.js';
+import {OrbitControls} from './node_modules/three/examples/jsm/controls/OrbitControls.js';
+import {GLTFLoader} from './node_modules/three/examples/jsm/loaders/GLTFLoader.js';
 
 let container,
     scene,
@@ -18,6 +18,9 @@ let container,
 
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
+let pointedAtObj;
+let intersected;
+
 // shader uniforms
 // let uniforms;
 // let timeStart;
@@ -40,7 +43,8 @@ async function init() {
     buildPieces();
     addOrbitControls();
     window.addEventListener("resize", onWindowResize);
-    window.addEventListener( 'pointermove', onPointerMove );
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('click', idTile);
 }
 
 function animate() {  // animation loop
@@ -60,21 +64,42 @@ function updateScene() {  // scene updates per frame
 
     // update orbit controls (or other)
     if (controls) {
-          controls.update();
+        controls.update();
     }
     // update uniforms if using a shader
     // uniforms['u_time'].value = (timeStart - new Date().getTime())/1000;
 
     // picker
     // update the picking ray with the camera and pointer position
-    raycaster.setFromCamera( pointer, camera );
+    raycaster.setFromCamera(pointer, camera);
     // calculate objects intersecting the picking ray
-    const intersects = raycaster.intersectObjects( scene.children );
-    for ( let i = 0; i < intersects.length; i ++ ) {
-//        intersects[ i ].object.material.color.set( 0xff0000 );
-        console.log(intersects[i].object);
+    let intersects = raycaster.intersectObjects(scene.children, false);
+    if (intersects.length > 0) {
+        if (intersected != intersects[0].object && intersects[0].object.name.includes("panel")) {
+            // console.log(intersects[0].object);
+            pointedAtObj = intersects[0].object.clone();
+            if (intersected) {
+                intersected.material.emissive.setHex(intersected.currentHex);
+            }
+            intersected = intersects[0].object;
+            intersected.currentHex = intersected.material.emissive.getHex();
+            intersected.material.emissive.setHex(0xff0000);
+        } else {
+            if (intersected) intersected.material.emissive.setHex(intersected.currentHex);
+            intersected = null;
+        }
+    } else {
+        pointedAtObj = null;
     }
+}
 
+function idTile() {
+    raycaster.setFromCamera(pointer, camera);
+    raycaster.setFromCamera(pointer, camera);
+    let intersects = raycaster.intersectObjects(scene.children, false);
+    if (intersects.length > 0 && intersects[0].object.name.includes("panel")) {
+        console.log("You clicked on " + intersects[0].object.name);
+    }
 }
 
 function setCamera() {
@@ -102,12 +127,12 @@ function setLights() {
     scene.add(spotLt);
 }
 
-function onPointerMove( event ) {
+function onPointerMove(event) {
     // calculate pointer position in normalized device coordinates
     // (-1 to +1) for both components
-    pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-    pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
- //   console.log(pointer);
+    pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+    pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    //   console.log(pointer);
 }
 
 function buildRenderer() {
@@ -175,8 +200,8 @@ function buildBoard() {
     for (let i = 0; i < 64; i++) {
         tempTilePositRef = {x: (i % 8), y: Math.floor(i / 8)};
         geom = new THREE.BoxGeometry(1.9, 1.9, 0.1);
-        mat = new THREE.MeshPhongMaterial({
-            color: "purple",
+        mat = new THREE.MeshLambertMaterial({
+            color: 0x800080,
             transparent: true,
             opacity: 0.5,
             side: THREE.DoubleSide,
@@ -184,6 +209,7 @@ function buildBoard() {
         mesh = new THREE.Mesh(geom, mat);
         let posit = new THREE.Vector3(tempTilePositRef.x * 2 - 7, 0, tempTilePositRef.y * 2 - 7);
         mesh.position.set(posit.x, posit.y, posit.z);
+        mesh.name = "panel-" + i;
         mesh.rotateX(Math.PI / 2);
         board.push({tempTilePositRef, mesh});
         scene.add(mesh);
@@ -211,7 +237,7 @@ function buildPieces() {
             color: "white",
             side: THREE.DoubleSide,
         });
-        temp2.position.set(((i + 48) % 8) * 2 - 7, 0, Math.floor((i + 48) / 8) * 2 -7);
+        temp2.position.set(((i + 48) % 8) * 2 - 7, 0, Math.floor((i + 48) / 8) * 2 - 7);
         temp2.rotateZ(Math.PI);
         bTeam.push(temp2);
         scene.add(temp2);
@@ -226,20 +252,20 @@ function buildPieces() {
 // }
 
 // function initShaderMat() {
-    // shader stuff
-    // timeStart = new Date().getTime();
-    // uniforms = {
-    //     u_time: {value: 1.0},
-    //     u_resolution: {value: {x: 512, y: 512}},
-    // };
-    // material = new THREE.ShaderMaterial({
-    //     uniforms: uniforms,
-    //     vertexShader: vertexShader(),//loadedVertexShader,
-    //     fragmentShader: fragmentShader(),//loadedFragmentShader,
-    //     // vertexShader: vertexShader(),
-    //     // fragmentShader: fragmentShader(),
-    // });
-    // return material;
+// shader stuff
+// timeStart = new Date().getTime();
+// uniforms = {
+//     u_time: {value: 1.0},
+//     u_resolution: {value: {x: 512, y: 512}},
+// };
+// material = new THREE.ShaderMaterial({
+//     uniforms: uniforms,
+//     vertexShader: vertexShader(),//loadedVertexShader,
+//     fragmentShader: fragmentShader(),//loadedFragmentShader,
+//     // vertexShader: vertexShader(),
+//     // fragmentShader: fragmentShader(),
+// });
+// return material;
 // }
 
 function addOrbitControls() {
