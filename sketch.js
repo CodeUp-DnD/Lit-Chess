@@ -71,7 +71,8 @@ function updateScene() {  // scene updates per frame
     // calculate objects intersecting the picking ray
     const intersects = raycaster.intersectObjects( scene.children );
     for ( let i = 0; i < intersects.length; i ++ ) {
-        intersects[ i ].object.material.color.set( 0xff0000 );
+//        intersects[ i ].object.material.color.set( 0xff0000 );
+        console.log(intersects[i].object);
     }
 
 }
