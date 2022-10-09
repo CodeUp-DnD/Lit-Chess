@@ -1,10 +1,7 @@
 /*//////////////////////////////////////////////////////////////
 Original code by David Gail Smith and Aldanis Vigo, October 2022
 */ /////////////////////////////////////////////////////////////
-
-import * as THREE from "./node_modules/three/src/Three.js";
-import {OrbitControls} from './node_modules/three/examples/jsm/controls/OrbitControls.js';
-import {GLTFLoader} from './node_modules/three/examples/jsm/loaders/GLTFLoader.js';
+//  Written using THREE r145
 
 let container,
     scene,
@@ -148,7 +145,7 @@ function onWindowResize() {  // needed to resize others along with window
 }
 
 const loadModel = async url => {
-    const loader = new GLTFLoader();
+    const loader = new THREE.GLTFLoader();
     let gltf = await loader.loadAsync(url);
     return gltf;
 }
@@ -269,7 +266,7 @@ function buildPieces() {
 // }
 
 function addOrbitControls() {
-    controls = new OrbitControls(camera, container);
+    controls = new THREE.OrbitControls(camera, container);
     controls.minDistance = 5;
     controls.maxDistance = 500;
 //    controls.autoRotate = true;
