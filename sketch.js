@@ -17,6 +17,9 @@ const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 let pointedAtObj;
 let intersected;
+let selectedFrom = null;
+let selectedTo = null;
+let holderTile;
 
 // shader uniforms
 // let uniforms;
@@ -42,6 +45,7 @@ async function init() {
     window.addEventListener("resize", onWindowResize);
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('click', idTile);
+    window.addEventListener('keydown', keyPressed);
 }
 
 function animate() {  // animation loop
@@ -97,6 +101,17 @@ function idTile() {
     if (intersects.length > 0 && intersects[0].object.name.includes("panel")) {
         console.log("You clicked on " + intersects[0].object.name);
     }
+    if (selectedFrom === null) {  // also check to be sure a piece is on the location
+        selectedFrom = intersects[0].object;
+        selectedFrom.material.emissive.setHex(0xff00ff);
+        console.log("Selected 'from', waiting for 'to'");
+    } else {  // also check to be sure that the destination is a  valid move
+        selectedTo = intersects[0].object;
+        console.log("moving from " + selectedFrom.name + " to " + selectedTo.name);
+        selectedFrom.material.emissive.setHex(holderTile.material.emissive.getHex());
+        selectedFrom = null;
+        selectedTo = null;
+    }
 }
 
 function setCamera() {
@@ -130,6 +145,17 @@ function onPointerMove(event) {
     pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
     pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
     //   console.log(pointer);
+}
+
+function keyPressed(e) {
+    console.log(e.which);
+    if (e.which == 27) {
+        selectedFrom = null;
+        selectedFrom.material.emissive.setHex(holderTile.material.emissive.getHex());
+        selectedTo = null;
+        selectedFrom.material.emissive.setHex(holderTile.material.emissive.getHex());
+        console.log("Deselected");
+    }
 }
 
 function buildRenderer() {
@@ -211,6 +237,7 @@ function buildBoard() {
         board.push({tempTilePositRef, mesh});
         scene.add(mesh);
     }
+    holderTile = mesh.clone();
 }
 
 function buildPieces() {
