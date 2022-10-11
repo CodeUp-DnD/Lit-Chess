@@ -17,9 +17,11 @@ const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 let pointedAtObj;
 let intersected;
-let selectedFrom = null;
-let selectedTo = null;
-let holderTile;
+let selectedFrom;
+let selectedTo;
+let dimTile;
+let litTile;
+let intersects;
 
 // shader uniforms
 // let uniforms;
@@ -74,7 +76,7 @@ function updateScene() {  // scene updates per frame
     // update the picking ray with the camera and pointer position
     raycaster.setFromCamera(pointer, camera);
     // calculate objects intersecting the picking ray
-    let intersects = raycaster.intersectObjects(scene.children, false);
+    intersects = raycaster.intersectObjects(scene.children, false);
     if (intersects.length > 0) {
         if (intersected != intersects[0].object && intersects[0].object.name.includes("panel")) {
             // console.log(intersects[0].object);
@@ -95,22 +97,21 @@ function updateScene() {  // scene updates per frame
 }
 
 function idTile() {
-    raycaster.setFromCamera(pointer, camera);
-    raycaster.setFromCamera(pointer, camera);
-    let intersects = raycaster.intersectObjects(scene.children, false);
+//    raycaster.setFromCamera(pointer, camera);
+//    let intersects = raycaster.intersectObjects(scene.children, false);
     if (intersects.length > 0 && intersects[0].object.name.includes("panel")) {
-        console.log("You clicked on " + intersects[0].object.name);
-    }
-    if (selectedFrom === null) {  // also check to be sure a piece is on the location
-        selectedFrom = intersects[0].object;
-        selectedFrom.material.emissive.setHex(0xff00ff);
-        console.log("Selected 'from', waiting for 'to'");
-    } else {  // also check to be sure that the destination is a  valid move
-        selectedTo = intersects[0].object;
-        console.log("moving from " + selectedFrom.name + " to " + selectedTo.name);
-        selectedFrom.material.emissive.setHex(holderTile.material.emissive.getHex());
-        selectedFrom = null;
-        selectedTo = null;
+        // console.log("You clicked on " + intersects[0].object.name);
+        if (selectedFrom === dimTile) {  // also check to be sure a piece is on the location
+            selectedFrom = intersects[0].object;
+            selectedFrom.material.emissive.setHex(litTile.material.emissive.getHex());
+            console.log("Selected 'from' " + selectedFrom.name + ", waiting for 'to'");
+        } else {  // also check to be sure that the destination is a  valid move
+            selectedTo = intersects[0].object;
+            console.log("moving from " + selectedFrom.name + " to " + selectedTo.name);
+            board.forEach(element => {element.mesh.material.emissive.setHex(dimTile.material.emissive.getHex())})
+            selectedFrom = dimTile.clone();
+            selectedTo = dimTile.clone();
+        }
     }
 }
 
@@ -150,10 +151,9 @@ function onPointerMove(event) {
 function keyPressed(e) {
     console.log(e.which);
     if (e.which == 27) {
-        selectedFrom = null;
-        selectedFrom.material.emissive.setHex(holderTile.material.emissive.getHex());
-        selectedTo = null;
-        selectedFrom.material.emissive.setHex(holderTile.material.emissive.getHex());
+        selectedFrom = dimTile.clone();
+        selectedTo = dimTile.clone();
+        board.forEach(element => {element.mesh.material.emissive.setHex(dimTile.material.emissive.getHex())})
         console.log("Deselected");
     }
 }
@@ -237,7 +237,11 @@ function buildBoard() {
         board.push({tempTilePositRef, mesh});
         scene.add(mesh);
     }
-    holderTile = mesh.clone();
+    dimTile = mesh.clone();
+    selectedFrom = dimTile.clone();
+    selectedTo = dimTile.clone();
+    litTile = mesh.clone();
+    litTile.material.emissive.setHex(0xff0000);
 }
 
 function buildPieces() {
