@@ -16,12 +16,12 @@ let container,
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 let pointedAtObj;
-let intersected;
-let selectedFrom;
-let selectedTo;
+let intersected = null;
+let selectedFrom = null;
+let selectedTo = null;
 let dimTile;
 let litTile;
-let intersects;
+let intersects = null;
 
 // shader uniforms
 // let uniforms;
@@ -31,6 +31,7 @@ let models = [];
 let aTeam = [];
 let bTeam = [];
 let board = [];
+let pickableObjects = [];
 
 async function init() {
     scene = new THREE.Scene();
@@ -42,8 +43,10 @@ async function init() {
     document.body.appendChild(container);
     await loadGLTFAssets();
     buildBoard();
+    board.forEach(element => {element.mesh.material.emissive.setHex(dimTile.material.emissive.getHex)})
     buildPieces();
     addOrbitControls();
+    console.log(scene.children);
     window.addEventListener("resize", onWindowResize);
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('click', idTile);
@@ -71,30 +74,25 @@ function updateScene() {  // scene updates per frame
     }
     // update uniforms if using a shader
     // uniforms['u_time'].value = (timeStart - new Date().getTime())/1000;
+    checkForMouseOver();
+}
 
-    // picker
+function checkForMouseOver() {
     // update the picking ray with the camera and pointer position
     raycaster.setFromCamera(pointer, camera);
     // calculate objects intersecting the picking ray
-    intersects = raycaster.intersectObjects(scene.children, false);
+    intersects = raycaster.intersectObjects(pickableObjects, false);
     if (intersects.length > 0) {
-        if (intersected != intersects[0].object && intersects[0].object.name.includes("panel")) {
+        if (intersected !== intersects[0].object /*&& intersects[0].object.name.includes("panel")*/) {
             // console.log(intersects[0].object);
-            let newMat = intersects[0].object.material.clone();
-            newMat.emissive.setHex(litTile.material.emissive.getHex);
-            intersects[0].object.material = newMat;
-        //     pointedAtObj = intersects[0].object.clone();
-        //     if (intersected) {
-        //         intersected.material.emissive.setHex(litTile.material.emissive.currentHex);
-        //     }
-        //     intersected = intersects[0].object;
-        //     intersected.currentHex = dimTile.material.emissive.getHex();
-        //     intersected.material.emissive.setHex(litTile.material.emissive.currentHex);
-        // } else {
-        //     if (intersected) intersected.material.emissive.setHex(dimTile.material.emissive.getHex());
-        //     intersected = null;
+            if (intersected) intersected.material.emissive.setHex(intersected.currentHex);
+            intersected = intersects[0].object;
+            intersected.currentHex = intersected.material.emissive.getHex();
+            intersected.material.emissive.setHex(0xff0000);
         }
     } else {
+        if (intersected /*&& intersects[0].object.name.includes("panel")*/) intersected.material.emissive.setHex(intersected.currentHex);
+        intersected = null;
         // pointedAtObj = null;
     }
 }
@@ -102,19 +100,19 @@ function updateScene() {  // scene updates per frame
 function idTile() {
 //    raycaster.setFromCamera(pointer, camera);
 //    let intersects = raycaster.intersectObjects(scene.children, false);
-    if (intersects.length > 0 && intersects[0].object.name.includes("panel")) {
-        // console.log("You clicked on " + intersects[0].object.name);
-        if (selectedFrom === dimTile) {  // also check to be sure a piece is on the location
-            selectedFrom = intersects[0].object;
-            selectedFrom.material.emissive.setHex(litTile.material.emissive.getHex());
-            console.log("Selected 'from' " + selectedFrom.name + ", waiting for 'to'");
-        } else {  // also check to be sure that the destination is a  valid move
-            selectedTo = intersects[0].object;
-            console.log("moving from " + selectedFrom.name + " to " + selectedTo.name);
-            selectedFrom = dimTile.clone();
-            selectedTo = dimTile.clone();
-            board.forEach(element => {element.mesh.material.emissive.setHex(dimTile.material.emissive.getHex())})
-        }
+    if (intersects.length > 0) {
+         console.log("You clicked on " + intersects[0].object.name);
+        // if (selectedFrom === dimTile) {  // also check to be sure a piece is on the location
+        //     selectedFrom = intersects[0].object;
+        //     selectedFrom.material.emissive.setHex(litTile.material.emissive.getHex());
+        //     console.log("Selected 'from' " + selectedFrom.name + ", waiting for 'to'");
+        // } else {  // also check to be sure that the destination is a  valid move
+        //     selectedTo = intersects[0].object;
+        //     console.log("moving from " + selectedFrom.name + " to " + selectedTo.name);
+        //     selectedFrom = dimTile.clone();
+        //     selectedTo = dimTile.clone();
+        //     board.forEach(element => {element.mesh.material.emissive.setHex(dimTile.material.emissive.getHex())})
+        // }
     }
 }
 
@@ -144,15 +142,12 @@ function setLights() {
 }
 
 function onPointerMove(event) {
-    getPointerCoords();
- }
-
-function getPointerCoords() {
     // calculate pointer position in normalized device coordinates
     // (-1 to +1) for both components
     pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
     pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
     //   console.log(pointer);
+
 }
 
 function keyPressed(e) {
@@ -160,7 +155,7 @@ function keyPressed(e) {
     if (e.which == 27) {
         selectedFrom = dimTile.clone();
         selectedTo = dimTile.clone();
-        board.forEach(element => {element.mesh.material.emissive.setHex(dimTile.material.emissive.getHex())})
+        board.forEach(element => {element.mesh.material.emissive.setHex(dimTile.material.emissive.getHex)})
         console.log("Deselected");
     }
 }
@@ -241,6 +236,7 @@ function buildBoard() {
         mesh.position.set(posit.x, posit.y, posit.z);
         mesh.name = "panel-" + i;
         mesh.rotateX(Math.PI / 2);
+        pickableObjects.push(mesh);
         board.push({tempTilePositRef, mesh});
         scene.add(mesh);
     }
