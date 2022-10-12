@@ -14,7 +14,7 @@ let container,
     controls;
 
 const raycaster = new THREE.Raycaster();
-const pointer = new THREE.Vector2();
+const pointer = new THREE.Vector2(1,1);
 let pointedAtObj;
 let intersected = null;
 let selectedFrom = null;
@@ -32,6 +32,7 @@ let aTeam = [];
 let bTeam = [];
 let board = [];
 let pickableObjects = [];
+let moused = null;
 
 async function init() {
     scene = new THREE.Scene();
@@ -43,7 +44,6 @@ async function init() {
     document.body.appendChild(container);
     await loadGLTFAssets();
     buildBoard();
-    board.forEach(element => {element.mesh.material.emissive.setHex(dimTile.material.emissive.getHex)})
     buildPieces();
     addOrbitControls();
     console.log(scene.children);
@@ -78,42 +78,40 @@ function updateScene() {  // scene updates per frame
 }
 
 function checkForMouseOver() {
+    // ensure intersects array is clear;
+    intersects = [];
     // update the picking ray with the camera and pointer position
     raycaster.setFromCamera(pointer, camera);
     // calculate objects intersecting the picking ray
-    intersects = raycaster.intersectObjects(pickableObjects, false);
-    if (intersects.length > 0) {
-        if (intersected !== intersects[0].object /*&& intersects[0].object.name.includes("panel")*/) {
+    intersects = raycaster.intersectObjects(pickableObjects, false);  // see if mousing over pickable object
+    if (intersects.length > 0) {  //  the ray hit a pickable object
+        if (intersected !== intersects[0].object) {  // if not on the previously seen object
             // console.log(intersects[0].object);
-            if (intersected) intersected.material.emissive.setHex(intersected.currentHex);
-            intersected = intersects[0].object;
-            intersected.currentHex = intersected.material.emissive.getHex();
-            intersected.material.emissive.setHex(0xff0000);
+            if (intersected) moused = intersects[0].object.name;//intersected.material.emissive.setHex(intersected.currentHex); // turn previously moused object backed to its color
+            intersected = intersects[0].object;  // set intersected to newly moused object
+            intersected.currentHex = intersected.material.emissive.getHex();  //reset
+            intersected.material.emissive.setHex(0x0000ff);  // set to red
         }
     } else {
-        if (intersected /*&& intersects[0].object.name.includes("panel")*/) intersected.material.emissive.setHex(intersected.currentHex);
         intersected = null;
-        // pointedAtObj = null;
     }
+    cleanUpBoardSelections();
 }
 
 function idTile() {
-//    raycaster.setFromCamera(pointer, camera);
-//    let intersects = raycaster.intersectObjects(scene.children, false);
     if (intersects.length > 0) {
-         console.log("You clicked on " + intersects[0].object.name);
-        // if (selectedFrom === dimTile) {  // also check to be sure a piece is on the location
-        //     selectedFrom = intersects[0].object;
-        //     selectedFrom.material.emissive.setHex(litTile.material.emissive.getHex());
-        //     console.log("Selected 'from' " + selectedFrom.name + ", waiting for 'to'");
-        // } else {  // also check to be sure that the destination is a  valid move
-        //     selectedTo = intersects[0].object;
-        //     console.log("moving from " + selectedFrom.name + " to " + selectedTo.name);
-        //     selectedFrom = dimTile.clone();
-        //     selectedTo = dimTile.clone();
-        //     board.forEach(element => {element.mesh.material.emissive.setHex(dimTile.material.emissive.getHex())})
-        // }
+        if (selectedFrom === null) {  // also check to be sure a piece is on the location
+            console.log("The 'from' piece is " + intersects[0].object.name);
+            selectedFrom = Number(intersects[0].object.name);
+             console.log("Selected 'from' " + selectedFrom + ", waiting for 'to'.");
+        } else {  // also check to be sure that the destination is a  valid move
+                 selectedTo = Number(intersects[0].object.name);
+                 console.log("Selected 'to' " + selectedTo + ".")
+            // check to see if move is valid here
+                 console.log("If move is valid, moving from " + selectedFrom + " to " + selectedTo);
+        }
     }
+    cleanUpBoardSelections();
 }
 
 function setCamera() {
@@ -153,9 +151,10 @@ function onPointerMove(event) {
 function keyPressed(e) {
     console.log(e.which);
     if (e.which == 27) {
-        selectedFrom = dimTile.clone();
-        selectedTo = dimTile.clone();
-        board.forEach(element => {element.mesh.material.emissive.setHex(dimTile.material.emissive.getHex)})
+        selectedFrom = null;//dimTile.clone();
+        selectedTo = null;//dimTile.clone();
+        moused = null;
+  //      board.forEach(element => {element.mesh.material.emissive.setHex(dimTile.material.emissive.getHex)})
         console.log("Deselected");
     }
 }
@@ -234,17 +233,27 @@ function buildBoard() {
         mesh = new THREE.Mesh(geom, mat);
         let posit = new THREE.Vector3(tempTilePositRef.x * 2 - 7, 0, tempTilePositRef.y * 2 - 7);
         mesh.position.set(posit.x, posit.y, posit.z);
-        mesh.name = "panel-" + i;
+        mesh.name = i;
         mesh.rotateX(Math.PI / 2);
         pickableObjects.push(mesh);
         board.push({tempTilePositRef, mesh});
         scene.add(mesh);
     }
     dimTile = mesh.clone();
-    selectedFrom = dimTile.clone();
-    selectedTo = dimTile.clone();
+    selectedFrom = null;
+    selectedTo = null;
+    moused = null;
     litTile = mesh.clone();
     litTile.material.emissive.setHex(0xff0000);
+    cleanUpBoardSelections();
+}
+
+function cleanUpBoardSelections() {
+    board.forEach(element => {element.mesh.material.emissive.setHex(dimTile.material.emissive.getHex)});
+    console.log(selectedFrom, selectedTo, moused);
+    if (selectedFrom) board[selectedFrom].mesh.material.emissive.setHex(0x0000ff);
+    if (selectedTo) board[selectedTo].mesh.material.emissive.setHex(0x0000ff);
+    if (moused) board[moused].mesh.material.emissive.setHex(0x0000ff);
 }
 
 function buildPieces() {
