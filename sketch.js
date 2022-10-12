@@ -80,19 +80,22 @@ function updateScene() {  // scene updates per frame
     if (intersects.length > 0) {
         if (intersected != intersects[0].object && intersects[0].object.name.includes("panel")) {
             // console.log(intersects[0].object);
-            pointedAtObj = intersects[0].object.clone();
-            if (intersected) {
-                intersected.material.emissive.setHex(intersected.currentHex);
-            }
-            intersected = intersects[0].object;
-            intersected.currentHex = intersected.material.emissive.getHex();
-            intersected.material.emissive.setHex(0xff0000);
-        } else {
-            if (intersected) intersected.material.emissive.setHex(intersected.currentHex);
-            intersected = null;
+            let newMat = intersects[0].object.material.clone();
+            newMat.emissive.setHex(litTile.material.emissive.getHex);
+            intersects[0].object.material = newMat;
+        //     pointedAtObj = intersects[0].object.clone();
+        //     if (intersected) {
+        //         intersected.material.emissive.setHex(litTile.material.emissive.currentHex);
+        //     }
+        //     intersected = intersects[0].object;
+        //     intersected.currentHex = dimTile.material.emissive.getHex();
+        //     intersected.material.emissive.setHex(litTile.material.emissive.currentHex);
+        // } else {
+        //     if (intersected) intersected.material.emissive.setHex(dimTile.material.emissive.getHex());
+        //     intersected = null;
         }
     } else {
-        pointedAtObj = null;
+        // pointedAtObj = null;
     }
 }
 
@@ -108,9 +111,9 @@ function idTile() {
         } else {  // also check to be sure that the destination is a  valid move
             selectedTo = intersects[0].object;
             console.log("moving from " + selectedFrom.name + " to " + selectedTo.name);
-            board.forEach(element => {element.mesh.material.emissive.setHex(dimTile.material.emissive.getHex())})
             selectedFrom = dimTile.clone();
             selectedTo = dimTile.clone();
+            board.forEach(element => {element.mesh.material.emissive.setHex(dimTile.material.emissive.getHex())})
         }
     }
 }
@@ -141,6 +144,10 @@ function setLights() {
 }
 
 function onPointerMove(event) {
+    getPointerCoords();
+ }
+
+function getPointerCoords() {
     // calculate pointer position in normalized device coordinates
     // (-1 to +1) for both components
     pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
