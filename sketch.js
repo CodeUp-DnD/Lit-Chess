@@ -49,6 +49,7 @@ async function init() {
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('click', idTile);
     window.addEventListener('keydown', keyPressed);
+    alert("Inspect console for selections and processing");
 }
 
 function animate() {  // animation loop
@@ -103,7 +104,8 @@ function idTile() {
     if (intersects.length > 0) {
         if (selectedFrom === null) {
             // also add a check to be sure a piece is on the location
-            console.log("The 'from' piece is " + intersects[0].object.name);
+            console.log("The 'from' selection is " + intersects[0].object.name);
+            console.log("That contains a " + (board[intersects[0].object.name].currentPiece==""?"big nothing":board[intersects[0].object.name].currentPiece))
             selectedFrom = Number(intersects[0].object.name);
              console.log("Selected 'from' index " + selectedFrom + " - board: " + board[selectedFrom].notation + ", waiting for 'to'.");
         } else {
@@ -197,7 +199,7 @@ function loadGLTFAssets() {  // load GLB model(s)
                 color: "red",
             });
             // load each 3d model into a model array for later use in building teams
-            let order = ["pawn", "rook", "bishop", "knight", "queen", "king"];
+            let order = ["pawn", "rook", "knight", "bishop", "queen", "king"];
             let gltfs = [];
             for (let i = 0; i < order.length; i++) {
                 let url = "./assets/modelsGLB/" + order[i] + ".glb";
@@ -235,7 +237,7 @@ function buildBoard() {
         tempTilePositRef = {x: (i % 8), y: Math.floor(i / 8)};
         notation = "ABCDEFGH".charAt(i%8) + (Math.floor(i / 8) + 1);
         currentPiece = "";
-        console.log(notation);
+        //console.log(notation);
         geom = new THREE.BoxGeometry(1.9, 1.9, 0.1);
         mat = new THREE.MeshLambertMaterial({
             color: (((Math.floor(i / 8)%2!=0) && (i%2!=0)) || ((Math.floor(i / 8)%2==0) && (i%2==0)))?0x444444:0x888888,
@@ -256,7 +258,7 @@ function buildBoard() {
         board.push({tempTilePositRef, mesh, notation, currentPiece});
         scene.add(mesh);
     }
-    console.log(board);
+    //console.log(board);
     dimTile = mesh.clone();
     selectedFrom = null;
     selectedTo = null;
