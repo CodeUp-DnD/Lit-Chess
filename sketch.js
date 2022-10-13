@@ -49,6 +49,10 @@ async function init() {
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('click', idTile);
     window.addEventListener('keydown', keyPressed);
+
+    window.addEventListener("pointerdown", idTile);
+    window.addEventListener("pointermove", onPointerMove);
+
     alert("Inspect console for selections and processing");
 }
 
