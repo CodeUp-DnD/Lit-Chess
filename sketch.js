@@ -15,8 +15,7 @@ let container,
 
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2(1,1);
-let pointedAtObj;
-let intersected = null;
+let intersected;
 let selectedFrom = null;
 let selectedTo = null;
 let dimTile;
@@ -36,7 +35,7 @@ let moused = null;
 
 async function init() {
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000000);
+    scene.background = new THREE.Color(0x777777);
     setCamera();
     setLights();
     buildRenderer();
@@ -46,7 +45,6 @@ async function init() {
     buildBoard();
     buildPieces();
     addOrbitControls();
-    console.log(scene.children);
     window.addEventListener("resize", onWindowResize);
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('click', idTile);
@@ -78,6 +76,7 @@ function updateScene() {  // scene updates per frame
 }
 
 function checkForMouseOver() {
+
     // ensure intersects array is clear;
     intersects = [];
     // update the picking ray with the camera and pointer position
@@ -92,23 +91,32 @@ function checkForMouseOver() {
             intersected.currentHex = intersected.material.emissive.getHex();  //reset
             intersected.material.emissive.setHex(0x0000ff);  // set to red
         }
+        cleanUpBoardSelections();
+
     } else {
+        cleanUpBoardSelections();
         intersected = null;
     }
-    cleanUpBoardSelections();
 }
 
 function idTile() {
     if (intersects.length > 0) {
-        if (selectedFrom === null) {  // also check to be sure a piece is on the location
+        if (selectedFrom === null) {
+            // also add a check to be sure a piece is on the location
             console.log("The 'from' piece is " + intersects[0].object.name);
             selectedFrom = Number(intersects[0].object.name);
-             console.log("Selected 'from' " + selectedFrom + ", waiting for 'to'.");
-        } else {  // also check to be sure that the destination is a  valid move
+             console.log("Selected 'from' index " + selectedFrom + " - board: " + board[selectedFrom].notation + ", waiting for 'to'.");
+        } else {
+            // also add a check to be sure that the destination is a valid move
                  selectedTo = Number(intersects[0].object.name);
-                 console.log("Selected 'to' " + selectedTo + ".")
+                 console.log("Selected 'to' index " + selectedTo + " - board: " + board[selectedTo].notation);
             // check to see if move is valid here
-                 console.log("If move is valid, moving from " + selectedFrom + " to " + selectedTo);
+                 console.log("If move is valid, moving from " + board[selectedFrom].notation + " to " + board[selectedTo].notation);
+            // deselect
+            selectedFrom = null;//dimTile.clone();
+            selectedTo = null;//dimTile.clone();
+            moused = null;
+
         }
     }
     cleanUpBoardSelections();
@@ -155,7 +163,7 @@ function keyPressed(e) {
         selectedTo = null;//dimTile.clone();
         moused = null;
   //      board.forEach(element => {element.mesh.material.emissive.setHex(dimTile.material.emissive.getHex)})
-        console.log("Deselected");
+        console.log("Deselected move.");
     }
 }
 
@@ -218,27 +226,35 @@ function loadGLTFAssets() {  // load GLB model(s)
 
 function buildBoard() {
     let tempTilePositRef = {};
+    let notation;
     let geom;
     let mat;
     let mesh;
     for (let i = 0; i < 64; i++) {
         tempTilePositRef = {x: (i % 8), y: Math.floor(i / 8)};
+        notation = "ABCDEFGH".charAt(i%8) + (Math.floor(i / 8) + 1);
+        console.log(notation);
         geom = new THREE.BoxGeometry(1.9, 1.9, 0.1);
         mat = new THREE.MeshLambertMaterial({
-            color: 0x800080,
+            color: (((Math.floor(i / 8)%2!=0) && (i%2!=0)) || ((Math.floor(i / 8)%2==0) && (i%2==0)))?0x444444:0x888888,
+            //((Math.floor(i / 8)%2==0) && (i%2==0))
             transparent: true,
             opacity: 0.5,
             side: THREE.DoubleSide,
         });
+        // if ((i%2) == 0) {
+        //     mat.color = 0x00ff00;
+        // }
         mesh = new THREE.Mesh(geom, mat);
         let posit = new THREE.Vector3(tempTilePositRef.x * 2 - 7, 0, tempTilePositRef.y * 2 - 7);
         mesh.position.set(posit.x, posit.y, posit.z);
         mesh.name = i;
         mesh.rotateX(Math.PI / 2);
         pickableObjects.push(mesh);
-        board.push({tempTilePositRef, mesh});
+        board.push({tempTilePositRef, mesh, notation});
         scene.add(mesh);
     }
+    console.log(board);
     dimTile = mesh.clone();
     selectedFrom = null;
     selectedTo = null;
@@ -250,7 +266,6 @@ function buildBoard() {
 
 function cleanUpBoardSelections() {
     board.forEach(element => {element.mesh.material.emissive.setHex(dimTile.material.emissive.getHex)});
-    console.log(selectedFrom, selectedTo, moused);
     if (selectedFrom) board[selectedFrom].mesh.material.emissive.setHex(0x0000ff);
     if (selectedTo) board[selectedTo].mesh.material.emissive.setHex(0x0000ff);
     if (moused) board[moused].mesh.material.emissive.setHex(0x0000ff);
@@ -258,26 +273,28 @@ function cleanUpBoardSelections() {
 
 function buildPieces() {
     // build two full sets of pieces, each set a different color
-    let order = [1, 2, 3, 4, 5, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0]; // rook, knight, bishop, etc. (models array indices)
-    for (let i = 0; i < order.length; i++) {
+    let orderB = [1, 2, 3, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0]; // rook, knight, bishop, etc. (models array indices)
+    let orderW = [0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 5, 4, 3, 2, 1]; // rook, knight, bishop, etc. (models array indices)
+    for (let i = 0; i < orderB.length; i++) {
         // team 1
-        let temp1 = models[order[i]].clone();
+        let temp1 = models[orderB[i]].clone();
         // this is phong, but could use shader material here if we get fancy (and below for tm 2
         temp1.material = new THREE.MeshPhongMaterial({
-            color: "grey",
+            color: 0xdddddd,
             side: THREE.DoubleSide,
         });
-        temp1.position.set((i % 8) * 2 - 7, 0, Math.floor((i / 8)) * 2 - 7);
+        temp1.position.set(Math.floor(i / 8) * 2 - 7, 0, ((i % 8)) * 2 - 7);
+ //       temp1.position.set(Math.floor((i / 8)) * 2 - 7, 0, (i % 8) * 2 - 7);
         aTeam.push(temp1)
         scene.add(temp1);
 
         // team 2
-        let temp2 = models[order[i]].clone();
+        let temp2 = models[orderW[i]].clone();
         temp2.material = new THREE.MeshPhongMaterial({
-            color: "white",
+            color: 0x444444,
             side: THREE.DoubleSide,
         });
-        temp2.position.set(((i + 48) % 8) * 2 - 7, 0, Math.floor((i + 48) / 8) * 2 - 7);
+        temp2.position.set(Math.floor((i + 48) / 8) * 2 - 7, 0, ((i + 48) % 8) * 2 - 7);
         temp2.rotateZ(Math.PI);
         bTeam.push(temp2);
         scene.add(temp2);
