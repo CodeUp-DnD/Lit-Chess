@@ -227,12 +227,14 @@ function loadGLTFAssets() {  // load GLB model(s)
 function buildBoard() {
     let tempTilePositRef = {};
     let notation;
+    let currentPiece;
     let geom;
     let mat;
     let mesh;
     for (let i = 0; i < 64; i++) {
         tempTilePositRef = {x: (i % 8), y: Math.floor(i / 8)};
         notation = "ABCDEFGH".charAt(i%8) + (Math.floor(i / 8) + 1);
+        currentPiece = "";
         console.log(notation);
         geom = new THREE.BoxGeometry(1.9, 1.9, 0.1);
         mat = new THREE.MeshLambertMaterial({
@@ -251,7 +253,7 @@ function buildBoard() {
         mesh.name = i;
         mesh.rotateX(Math.PI / 2);
         pickableObjects.push(mesh);
-        board.push({tempTilePositRef, mesh, notation});
+        board.push({tempTilePositRef, mesh, notation, currentPiece});
         scene.add(mesh);
     }
     console.log(board);
@@ -273,33 +275,46 @@ function cleanUpBoardSelections() {
 
 function buildPieces() {
     // build two full sets of pieces, each set a different color
-    let orderB = [1, 2, 3, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0]; // rook, knight, bishop, etc. (models array indices)
-    let orderW = [0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 5, 4, 3, 2, 1]; // rook, knight, bishop, etc. (models array indices)
-    for (let i = 0; i < orderB.length; i++) {
+    let names = "prnbqk";
+    let orderW = [1, 2, 3, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0]; // rook, knight, bishop, etc. (models array indices)
+    let orderB = [0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 5, 4, 3, 2, 1]; // rook, knight, bishop, etc. (models array indices)
+    for (let i = 0; i < orderW.length; i++) {
         // team 1
-        let temp1 = models[orderB[i]].clone();
+        let temp1 = models[orderW[i]].clone();
         // this is phong, but could use shader material here if we get fancy (and below for tm 2
         temp1.material = new THREE.MeshPhongMaterial({
             color: 0xdddddd,
             side: THREE.DoubleSide,
         });
         temp1.position.set(Math.floor(i / 8) * 2 - 7, 0, ((i % 8)) * 2 - 7);
- //       temp1.position.set(Math.floor((i / 8)) * 2 - 7, 0, (i % 8) * 2 - 7);
-        aTeam.push(temp1)
+        temp1.name = names.charAt(orderW[i]).toUpperCase();
+        temp1.index = Math.floor(i / 8) + ((i % 8) * 8); //console.log(temp1.index);
+        aTeam.push(temp1);
         scene.add(temp1);
 
         // team 2
-        let temp2 = models[orderW[i]].clone();
+        let temp2 = models[orderB[i]].clone();
         temp2.material = new THREE.MeshPhongMaterial({
             color: 0x444444,
             side: THREE.DoubleSide,
         });
         temp2.position.set(Math.floor((i + 48) / 8) * 2 - 7, 0, ((i + 48) % 8) * 2 - 7);
+        temp2.name = names.charAt(orderB[i]);
+        temp2.index = Math.floor((i+48) / 8) + (((i+48) % 8) * 8);// console.log(temp2.index);
         temp2.rotateZ(Math.PI);
         bTeam.push(temp2);
         scene.add(temp2);
     }
+    updateBoardFromLocations();
 }
+
+function updateBoardFromLocations() {
+        for (let j = 0; j < 16; j++) {
+           board[aTeam[j].index].currentPiece = aTeam[j].name;
+           board[bTeam[j].index].currentPiece = bTeam[j].name;
+        }
+        //console.log(board);
+    }
 
 // function utilShowOrigin() {
 //     let geom = new THREE.SphereGeometry(.5);
