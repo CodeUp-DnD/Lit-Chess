@@ -32,8 +32,7 @@ async function init() {
     container = renderer.domElement;
     document.body.appendChild(container);
  // loadAssets();  //  to load a 3d model obj from file or ipfs link
-    let assetLoadResults = await loadGLTFAssets();  // load glb 3m model
-    console.log(assetLoadResults)
+    await loadGLTFAssets();  // load glb 3m model
  //   buildIt();
     buildBoard();
     buildPieces();
@@ -155,18 +154,15 @@ function loadGLTFAssets() {  // load GLB model(s)
             side: THREE.DoubleSide,
             color: new THREE.Color(.7, .7, .7),
             roughness: 0.2,
-        });
+        })
         
         let order = ["pawn", "rook", "bishop", "knight", "queen", "king"];
         let gltfs = []
         for (let i = 0; i < order.length; i ++) {
           let url = "./assets/modelsGLB/" + order[i] + ".glb";
-          gltfs.push(await loadModel(url))
+          let scene = (await loadModel(url)).scene
+          models.push(scene)
         }
-        gltfs.forEach(item=>{
-          models.push(item.scene)
-          console.log(item.scene)
-        })
         await Promise.all(gltfs)
         resolve(true)
       }catch(err){
@@ -181,7 +177,7 @@ function buildBoard() {
     let mat;
     let mesh;
     for (let i = 0; i < 64; i++) {
-        tempTilePositRef = {x: ((i) % 8), y: Math.floor((i) / 8)};
+        tempTilePositRef = {x: (i % 8), y: Math.floor(i / 8)};
         geom = new THREE.BoxGeometry(1.9,1.9,0.1);
         mat = new THREE.MeshPhongMaterial({
             color: "purple",
@@ -190,7 +186,7 @@ function buildBoard() {
             side: THREE.DoubleSide,
         });
         mesh = new THREE.Mesh(geom, mat);
-        let posit = new THREE.Vector3(tempTilePositRef.x * 2 - 4, 0, tempTilePositRef.y *2 - 4);
+        let posit = new THREE.Vector3(tempTilePositRef.x * 2 - 4, 0, tempTilePositRef.y * 2 - 4);
         mesh.position.set(posit.x, posit.y, posit.z);
         mesh.rotateX(Math.PI/2);
         board.push({tempTilePositRef, mesh});
@@ -199,22 +195,21 @@ function buildBoard() {
 }
 
 function buildPieces() {  // models array not poulating - fix glb asset loader
-    console.log(models)
-    console.log("All - " + models);
-    let order = [1, 2, 3, 4, 5, 3, 2, 1, 0, 0, 0, 0 ,0 ,0 ,0 ,0];
-    for (let i = 0; i < order.length; i++) {
-        let temp1 = models[order[i]];
-        let temp2 = models[order[i]];
-        // console.log(temp1, temp2);
-//        temp1.material.color = new THREE.Color("black");
-       temp1.position.set(((i) % 8) * 2 - 4, 0, ((i) / 8) * 2 - 4);
-        aTeam.push(temp1)
-        scene.add(temp1);
+  console.log(models)
+  let order = [1, 2, 3, 4, 5, 3, 2, 1, 0, 0, 0, 0 ,0 ,0 ,0 ,0];
+  for (let i = 0; i < order.length; i++) {
+    let temp1 = models[order[i]];
+    let temp2 = models[order[i]];
+      // console.log(temp1, temp2);
+    //  temp1.material.color = new THREE.Color("black");
+    temp1.position.set(i % 8 * 2 - 4, 0, i / 8 * 2 - 2);
+    aTeam.push(temp1)
+    scene.add(temp1);
 //        temp2.material.color = new THREE.Color("white");
-       temp2.position.set(((i) % 8) * 2 - 4, 0, ((i) / 8) * 2 + 3);
-        bTeam.push(temp2);
-        scene.add(temp2);
-    }
+    temp2.position.set(i % 8 * 2 - 4, 0, i / 8 * 2 + 3);
+    bTeam.push(temp2);
+    scene.add(temp2);
+  }
 }
 
 function buildIt() {
@@ -225,19 +220,21 @@ function buildIt() {
     // build a cube;
     geometry = new THREE.BoxGeometry(2, 2, 2);
 
-    // shader stuff
-    // timeStart = new Date().getTime();
-    // uniforms = {
-    //     u_time: {value: 1.0},
-    //     u_resolution: {value: {x: 512, y: 512}},
-    // };
-    // material = new THREE.ShaderMaterial({
-    //     uniforms: uniforms,
-    //     vertexShader: vertexShader(),//loadedVertexShader,
-    //     fragmentShader: fragmentShader(),//loadedFragmentShader,
-    //     // vertexShader: vertexShader(),
-    //     // fragmentShader: fragmentShader(),
-    // });
+    //shader stuff
+    timeStart = new Date().getTime();
+    
+    uniforms = {
+        u_time: {value: 1.0},
+        u_resolution: {value: {x: 512, y: 512}},
+    };
+
+    material = new THREE.ShaderMaterial({
+        uniforms: uniforms,
+        vertexShader: vertexShader(),//loadedVertexShader,
+        fragmentShader: fragmentShader(),//loadedFragmentShader,
+        // vertexShader: vertexShader(),
+        // fragmentShader: fragmentShader(),
+    });
 
     material = new THREE.MeshPhongMaterial({
         color: "purple",
@@ -267,6 +264,7 @@ const initiateChessEngineGame = () => {
   play()
   function play () {
       const status = game_engine.exportJson()
+      console.log(status)
       if (status.isFinished) {
           console.log(`${status.turn} is in ${status.checkMate ? 'checkmate' : 'draw'}`)
       } else {
